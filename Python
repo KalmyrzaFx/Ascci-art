@@ -1,0 +1,40 @@
+import cv2
+import os
+
+# Путь к изображению
+path = r'C:\Users\User\Pictures\Pictures\piter.jpeg'
+
+# Шкала ASCII символов
+string = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+coef = 255 / (len(string) - 1)
+
+# Загружаем изображение
+image = cv2.imread(path)
+if image is None:
+    print("Ошибка: не удалось открыть изображение.")
+    exit()
+
+# Преобразуем в серое и улучшаем контраст
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+gray_image = cv2.equalizeHist(gray_image)
+
+# Изменяем размер под ASCII
+height, width = gray_image.shape
+new_width = 250        # ширина в символах
+scale = new_width / width
+new_height = int(height * scale * 0.55)  # исправляем пропорции
+gray_image = cv2.resize(gray_image, (new_width, new_height))
+
+# Создаем папку output
+os.makedirs("output", exist_ok=True)
+
+# Генерация ASCII и запись в файл
+ascii_file = "output/ASCII_Art.txt"
+with open(ascii_file, "w", encoding="utf-8") as file:
+    for y in range(gray_image.shape[0]):
+        line = ""
+        for x in range(gray_image.shape[1]):
+            line += string[len(string) - int(gray_image[y, x] / coef) - 1]
+        file.write(line + "\n")
+
+print(f"✅ Готово! Результат в файле {ascii_file}")
